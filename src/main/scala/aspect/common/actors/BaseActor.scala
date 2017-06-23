@@ -12,17 +12,17 @@ trait BaseActor extends Actor with ActorLogging {
   override def aroundReceive(receive: Receive, msg: Any) : Unit =
     super.aroundReceive(LoggingReceive(receive), msg)
 
-  lazy val parent = context.parent
+  lazy val parent: ActorRef = context.parent
 
-  def become(behavior: Receive, discardOld: Boolean = true) = context.become(behavior, discardOld)
+  def become(behavior: Receive, discardOld: Boolean = true): Unit = context.become(behavior, discardOld)
 
-  def unbecome() = context.unbecome()
+  def unbecome(): Unit = context.unbecome()
 
-  def stop() = context.stop(self)
+  def stop(): Unit = context.stop(self)
 
-  def watch(subject: ActorRef) = context.watch(subject)
+  def watch(subject: ActorRef): ActorRef = context.watch(subject)
 
-  def unwatch(subject: ActorRef) = context.unwatch(subject)
+  def unwatch(subject: ActorRef): ActorRef = context.unwatch(subject)
 
   def scheduleOnce(delay: FiniteDuration,
                    message: Any,

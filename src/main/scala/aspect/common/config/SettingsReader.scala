@@ -1,4 +1,4 @@
-package aspect.common.settings
+package aspect.common.config
 
 import com.typesafe.config.Config
 
