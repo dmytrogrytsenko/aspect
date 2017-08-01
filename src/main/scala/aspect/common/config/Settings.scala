@@ -1,4 +1,4 @@
-package aspect.common.settings
+package aspect.common.config
 
 import com.typesafe.config.Config
 
@@ -6,7 +6,7 @@ import scala.reflect.ClassTag
 
 object Settings {
   def apply(cfg: Config): Settings =
-    new Settings { val config = cfg }
+    new Settings { val config: Config = cfg }
 
   def create[T <: Settings](config: Config)(implicit tag: ClassTag[T]): T = {
     tag.runtimeClass.getConstructor(classOf[Config]).newInstance(config).asInstanceOf[T]
