@@ -5,8 +5,10 @@ case class Shard(underlying: Int) {
 }
 
 object Shard {
-  val count = 128
+  val count: Int = 8
   val all: Set[Shard] = (0 until count).map(Shard.apply).toSet
 
-  def calc[T](value: T): Shard = ???
+  implicit class IntShardOps(val value: Int) extends AnyVal {
+    def toShard: Shard = Shard(value % count)
+  }
 }
