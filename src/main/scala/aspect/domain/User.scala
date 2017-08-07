@@ -11,6 +11,6 @@ case class User(id: UserId,
                 name: String,
                 passwordHash: Sha256,
                 email: String,
-                firstName: String,
-                lastName: String,
+                firstName: Option[String],
+                lastName: Option[String],
                 createdAt: LocalDateTime)
