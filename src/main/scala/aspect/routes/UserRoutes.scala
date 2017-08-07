@@ -14,10 +14,8 @@ trait UserRoutes extends Routes {
     (post & path("login")) {
       entity(as[LoginData]) { data =>
         validate(data.login.nonEmpty, BadRequest.Validation.requiredMemberEmpty("login").message) {
-          validate(data.password.nonEmpty, BadRequest.Validation.requiredMemberEmpty("password").message) {
-            complete {
-              LoginController.props(data).execute[LoginResult]
-            }
+          complete {
+            LoginController.props(data).execute[LoginResult]
           }
         }
       }

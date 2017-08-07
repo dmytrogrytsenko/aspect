@@ -5,6 +5,7 @@ import java.security.MessageDigest
 object Crypt {
 
   case class Md5(underlying: Array[Byte]) {
+    def parse(value: String): Md5 = Md5(hex2bytes(value))
     override def toString: String = s"${getClass.getSimpleName}(${underlying.HEX})"
   }
 
@@ -12,9 +13,16 @@ object Crypt {
     override def toString: String = s"${getClass.getSimpleName}(${underlying.HEX})"
   }
 
+  object Sha256 {
+    def parse(value: String): Sha256 = Sha256(hex2bytes(value))
+  }
+
   case class Adler32(underlying: Int) {
     override def toString: String = s"${getClass.getSimpleName}(${underlying.HEX})"
   }
+
+  def hex2bytes(hex: String): Array[Byte] =
+    hex.sliding(2, 2).map(Integer.parseInt(_, 16).toByte).toArray
 
   val md5Algorithm: MessageDigest = MessageDigest.getInstance("MD5")
   val sha256Algorithm: MessageDigest = MessageDigest.getInstance("SHA-256")

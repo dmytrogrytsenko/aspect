@@ -4,6 +4,7 @@ import akka.actor.Props
 import aspect.common.Messages.Start
 import aspect.common.actors.{BaseActor, NodeRings, NodeRingsSettings}
 import aspect.common.config.Settings
+import aspect.repositories.UserRepository
 import aspect.rest.{RestEndpoint, RestEndpointSettings}
 import com.typesafe.config.Config
 
@@ -16,6 +17,7 @@ class Guardian(settings: GuardianSettings) extends BaseActor {
   def receive: Receive = {
     case Start =>
       NodeRings.create(settings.rings)
+      UserRepository.create
       RestEndpoint.create(settings.rest)
   }
 }

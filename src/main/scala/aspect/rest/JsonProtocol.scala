@@ -7,8 +7,9 @@ import akka.http.scaladsl.model.Uri.Path.Segment
 import akka.http.scaladsl.server.PathMatcher1
 import akka.http.scaladsl.server.PathMatchers
 import akka.http.scaladsl.unmarshalling.Unmarshaller
+import aspect.common.Crypt._
 import aspect.common.Messages.Done
-import aspect.domain.{ProjectId, TargetId, UserId}
+import aspect.domain.{ProjectId, SessionToken, TargetId, UserId}
 import aspect.rest.models._
 import spray.json._
 
@@ -33,6 +34,14 @@ trait JsonProtocol extends DefaultJsonProtocol with RestErrors {
       case JsNumber(x) => StatusCode.int2StatusCode(x.toInt)
       case x => deserializationError("Expected StatusCode as JsNumber, but got " + x)
     }
+  }
+
+  implicit object Sha256JsonFormat extends JsonFormat[Sha256] {
+    def read(json: JsValue): Sha256 = json match {
+      case JsString(value) => Sha256.parse(value)
+      case _ => throw DeserializationException("Expected Sha256 as JsString")
+    }
+    def write(value: Sha256): JsValue = JsString(value.underlying.hex)
   }
 
   implicit object DoneJsonFormat extends RootJsonFormat[Done] {
@@ -67,25 +76,33 @@ trait JsonProtocol extends DefaultJsonProtocol with RestErrors {
     def write(value: TargetId): JsValue = JsString(value.value)
   }
 
+  implicit object SessionTokenJsonFormat extends JsonFormat[SessionToken] {
+    def read(json: JsValue): SessionToken = json match {
+      case JsString(value) => SessionToken(value)
+      case _ => throw DeserializationException("Expected SessionToken as JsString")
+    }
+    def write(value: SessionToken): JsValue = JsString(value.value)
+  }
+
   implicit val jsonError: RootJsonFormat[ErrorResult] = jsonFormat3(ErrorResult)
 
   implicit val jsonLoginData: RootJsonFormat[LoginData] = jsonFormat2(LoginData)
-  implicit val jsonLoginResult: RootJsonFormat[LoginResult] = jsonFormat1(LoginResult)
-  implicit val jsonProfileResult: RootJsonFormat[ProfileResult] = jsonFormat6(ProfileResult)
+  implicit val jsonLoginResult: RootJsonFormat[LoginResult] = jsonFormat1(LoginResult.apply)
+  implicit val jsonProfileResult: RootJsonFormat[ProfileResult] = jsonFormat6(ProfileResult.apply)
 
-  implicit val jsonProjectItemResult: RootJsonFormat[ProjectItemResult] = jsonFormat3(ProjectItemResult)
+  implicit val jsonProjectItemResult: RootJsonFormat[ProjectItemResult] = jsonFormat3(ProjectItemResult.apply)
   implicit val jsonProjectListResult: RootJsonFormat[ProjectListResult] = jsonFormat1(ProjectListResult)
-  implicit val jsonProjectResult: RootJsonFormat[ProjectUserResult] = jsonFormat2(ProjectUserResult)
-  implicit val jsonProjectUserResult: RootJsonFormat[ProjectResult] = jsonFormat4(ProjectResult)
+  implicit val jsonProjectResult: RootJsonFormat[ProjectUserResult] = jsonFormat2(ProjectUserResult.apply)
+  implicit val jsonProjectUserResult: RootJsonFormat[ProjectResult] = jsonFormat4(ProjectResult.apply)
   implicit val jsonAddProjectData: RootJsonFormat[AddProjectData] = jsonFormat1(AddProjectData)
   implicit val jsonAddProjectResult: RootJsonFormat[AddProjectResult] = jsonFormat1(AddProjectResult)
   implicit val jsonUpdateProjectData: RootJsonFormat[UpdateProjectData] = jsonFormat1(UpdateProjectData)
 
-  implicit val jsonTargetItemResult: RootJsonFormat[TargetItemResult] = jsonFormat3(TargetItemResult)
+  implicit val jsonTargetItemResult: RootJsonFormat[TargetItemResult] = jsonFormat3(TargetItemResult.apply)
   implicit val jsonTargetListResult: RootJsonFormat[TargetListResult] = jsonFormat1(TargetListResult)
-  implicit val jsonTargetUserResult: RootJsonFormat[TargetUserResult] = jsonFormat2(TargetUserResult)
-  implicit val jsonTargetProjectResult: RootJsonFormat[TargetProjectResult] = jsonFormat3(TargetProjectResult)
-  implicit val jsonTargetResult: RootJsonFormat[TargetResult] = jsonFormat4(TargetResult)
+  implicit val jsonTargetUserResult: RootJsonFormat[TargetUserResult] = jsonFormat2(TargetUserResult.apply)
+  implicit val jsonTargetProjectResult: RootJsonFormat[TargetProjectResult] = jsonFormat3(TargetProjectResult.apply)
+  implicit val jsonTargetResult: RootJsonFormat[TargetResult] = jsonFormat5(TargetResult.apply)
   implicit val jsonAddTargetData: RootJsonFormat[AddTargetData] = jsonFormat3(AddTargetData)
   implicit val jsonAddTargetResult: RootJsonFormat[AddTargetResult] = jsonFormat1(AddTargetResult)
   implicit val jsonUpdateTargetData: RootJsonFormat[UpdateTargetData] = jsonFormat2(UpdateTargetData)}

@@ -4,7 +4,7 @@ import akka.http.scaladsl.model.headers.{HttpChallenge, HttpCredentials}
 import akka.http.scaladsl.server.Directives
 import akka.http.scaladsl.server.directives.{AuthenticationDirective, AuthenticationResult}
 import akka.http.scaladsl.util.FastFuture
-import aspect.domain.UserId
+import aspect.domain.{SessionToken, UserId}
 
 import scala.concurrent.{ExecutionContextExecutor, Future}
 
@@ -24,9 +24,9 @@ trait AuthDirectives extends Directives {
   //      case SessionNotFound(`token`) => Future { None }
   //    }
 
-  def tokenAuthenticator(credentials: Option[HttpCredentials]): Future[AuthenticationResult[String]] = {
+  def tokenAuthenticator(credentials: Option[HttpCredentials]): Future[AuthenticationResult[SessionToken]] = {
     credentials match {
-      case Some(c) => FastFuture.successful(AuthenticationResult.success(c.token()))
+      case Some(c) => FastFuture.successful(AuthenticationResult.success(SessionToken(c.token())))
       case None => FastFuture.successful(AuthenticationResult.failWithChallenge(challenge))
     }
   }
