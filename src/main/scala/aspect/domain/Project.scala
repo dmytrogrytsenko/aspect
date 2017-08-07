@@ -1,8 +1,12 @@
 package aspect.domain
 
-import aspect.common.{EntityId, EntityIdCompanion}
+import java.time.LocalDateTime
 
-trait ProjectId extends EntityId
-object ProjectId extends EntityIdCompanion[ProjectId]
+import aspect.common.EntityId
 
-case class Project(id: ProjectId, userId: UserId, name: String)
+case class ProjectId (value: String) extends EntityId
+
+case class Project(id: ProjectId,
+                   userId: UserId,
+                   name: String,
+                   createdAt: LocalDateTime)

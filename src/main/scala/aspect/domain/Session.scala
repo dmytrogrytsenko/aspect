@@ -2,10 +2,9 @@ package aspect.domain
 
 import java.time.LocalDateTime
 
-import aspect.common.{EntityId, EntityIdCompanion}
+import aspect.common.EntityId
 
-trait SessionToken extends EntityId
-object SessionToken extends EntityIdCompanion[SessionToken]
+case class SessionToken(value: String) extends EntityId
 
 case class Session(token: SessionToken,
                    userId: UserId,

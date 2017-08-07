@@ -3,10 +3,9 @@ package aspect.domain
 import java.time.LocalDateTime
 
 import aspect.common.Crypt.Sha256
-import aspect.common.{EntityId, EntityIdCompanion}
+import aspect.common.EntityId
 
-trait UserId extends EntityId
-object UserId extends EntityIdCompanion[UserId]
+case class UserId(value: String) extends EntityId
 
 case class User(id: UserId,
                 name: String,
