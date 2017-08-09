@@ -4,6 +4,7 @@ import java.time.LocalDateTime
 
 import akka.actor._
 import aspect.common._
+import aspect.common.extensions.AkkaExtensions._
 import aspect.common.Messages.Start
 import aspect.common.config.Settings
 import com.typesafe.config.Config

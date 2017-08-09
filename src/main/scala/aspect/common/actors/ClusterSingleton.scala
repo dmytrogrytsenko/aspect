@@ -3,7 +3,9 @@ package aspect.common.actors
 import akka.actor._
 import akka.cluster.Cluster
 import akka.cluster.ClusterEvent._
+import aspect.common.extensions.AkkaExtensions._
 import aspect.common.Messages.Start
+import aspect.common.uuid
 
 import scala.reflect.ClassTag
 
@@ -69,7 +71,7 @@ class ClusterSingletonManager(role: Option[String], props: Props) extends BaseAc
     context.children.foreach(_ ! PoisonPill)
     leaderNode match {
       case None => become(waitingForLeader)
-      case Some(address) if address == cluster.selfAddress => become(leader(props.create(newUUID)))
+      case Some(address) if address == cluster.selfAddress => become(leader(props.create(uuid.toString)))
       case Some(address) => become(router(self.on(address)))
     }
     unstashAll()

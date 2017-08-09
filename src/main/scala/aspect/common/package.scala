@@ -11,17 +11,7 @@ package object common {
 
   def uuid: UUID = UUID.randomUUID()
 
-  implicit class PipedObject[T](value: T) {
-    def ~>[R](f: T => R): R = f(this.value)
-    def pipe[R](f: T => R): R = f(this.value)
-  }
-
-  implicit class PipedFunc[T, R](f: T => R) {
-    def <~[Z](v: Z => T): Z => R = x => f(v(x))
-    def <~(v: T): R = f(v)
-  }
-
-  implicit class RichDateTime(value: LocalDateTime) {
+  implicit class LocalDateTimeOps(value: LocalDateTime) {
     def >(operand: LocalDateTime): Boolean = value isAfter operand
     def <(operand: LocalDateTime): Boolean = value isBefore operand
     def >=(operand: LocalDateTime): Boolean = !value.isBefore(operand)

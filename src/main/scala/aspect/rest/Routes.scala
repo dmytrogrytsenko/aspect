@@ -8,10 +8,10 @@ import akka.pattern.ask
 import akka.util.Timeout
 import aspect.common.Messages.Start
 import aspect.common.actors.BaseActor
+import aspect.common.extensions.AkkaExtensions._
 
 import scala.concurrent.{ExecutionContext, ExecutionContextExecutor, Future, TimeoutException}
 import scala.reflect.ClassTag
-import scala.util.Failure
 
 trait Routes extends BaseActor
   with Directives
@@ -29,12 +29,5 @@ trait Routes extends BaseActor
                    executionContext: ExecutionContext,
                    timeout: Timeout): Future[(StatusCode, T)] =
       (context.actorOf(props) ? Start flatMap normalizeAskResult).mapTo[(StatusCode, T)]
-  }
-
-  def normalizeAskResult(msg: Any): Future[Any] = msg match {
-    case Failure(exception) => Future.failed(exception)
-    case Status.Failure(exception) => Future.failed(exception)
-    case ReceiveTimeout => Future.failed(new TimeoutException())
-    case result => Future.successful(result)
   }
 }
