@@ -17,5 +17,6 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-http" % "10.0.9",
   "com.typesafe.akka" %% "akka-http-spray-json" % "10.0.9",
   "com.github.mauricio" %% "postgresql-async" % "0.2.21",
-  "org.scalikejdbc" %% "scalikejdbc-async" % "0.8.0"
+  "org.scalikejdbc" %% "scalikejdbc-async" % "0.8.0",
+  "org.scalikejdbc" %% "scalikejdbc-syntax-support-macro" % "3.0.2"
 )
