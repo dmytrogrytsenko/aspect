@@ -1,7 +1,11 @@
 package aspect.repositories
 
+import akka.pattern.pipe
+import aspect.common.Messages.Start
 import aspect.common.actors.{BaseActor, NodeSingleton}
+import aspect.common.mongo.MongoDatabase
 import aspect.domain.{Project, ProjectId, UserId}
+import aspect.mongo.{BsonProtocol, ProjectCollection}
 
 object ProjectRepository extends NodeSingleton[ProjectRepository] {
   case class GetUserProjects(userId: UserId)
@@ -21,35 +25,31 @@ object ProjectRepository extends NodeSingleton[ProjectRepository] {
   case class ProjectUpdated(projectId: ProjectId)
 }
 
-class ProjectRepository extends BaseActor {
+class ProjectRepository extends BaseActor with BsonProtocol {
   import ProjectRepository._
+  import context.dispatcher
 
-  def receive: Receive = working(Nil)
+  val collection = new ProjectCollection(MongoDatabase.db)
 
-  def working(projects: List[Project]): Receive = {
+  def receive: Receive = {
+    case Start => collection.ensureIndexes
+
     case GetUserProjects(userId) =>
-      sender ! UserProjects(userId, projects.filter(_.userId == userId))
+      collection.getUserProjects(userId) map (UserProjects(userId, _)) pipeTo sender
 
     case FindProjectById(projectId) =>
-      val result = projects.find(_.id == projectId) match {
+      collection.get(projectId) map {
         case Some(project) => ProjectFoundById(project)
         case None => ProjectNotFoundById(projectId)
-      }
-      sender ! result
+      } pipeTo sender
 
     case AddProject(project) =>
-      become(working(project +: projects.filterNot(_.id == project.id)))
-      sender ! ProjectAdded(project.id)
+      collection.add(project) map (_ => ProjectAdded(project.id)) pipeTo sender
 
     case RemoveProject(projectId) =>
-      become(working(projects.filterNot(_.id == projectId)))
-      sender !  ProjectRemoved(projectId)
+      collection.remove(projectId) map (_ => ProjectRemoved(projectId)) pipeTo sender
 
     case UpdateProject(projectId, projectName) =>
-      projects.find(_.id == projectId).foreach { project =>
-        val updatedProject = project.copy(name = projectName.getOrElse(project.name))
-        become(working(updatedProject +: projects.filterNot(_.id == projectId)))
-      }
-      sender ! ProjectUpdated(projectId)
+      collection.update(projectId, projectName) map (_ => ProjectUpdated(projectId)) pipeTo sender
   }
 }

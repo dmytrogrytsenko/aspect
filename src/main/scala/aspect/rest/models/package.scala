@@ -2,10 +2,9 @@ package aspect.rest.models
 
 import java.time.LocalDateTime
 
-import aspect.common.Crypt.Sha256
 import aspect.domain._
 
-case class LoginData(login: String, passwordHash: Sha256)
+case class LoginData(login: String, password: String)
 case class LoginResult(token: SessionToken)
 
 case class ProfileResult(id: UserId,

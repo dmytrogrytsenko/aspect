@@ -3,6 +3,7 @@ package aspect.routes
 import akka.http.scaladsl.server.Route
 import aspect.common.Messages.Done
 import aspect.controllers.project._
+import aspect.rest.RestErrors.BadRequest
 import aspect.rest.models._
 import aspect.rest.Routes
 

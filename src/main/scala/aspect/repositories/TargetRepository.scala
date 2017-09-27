@@ -1,7 +1,11 @@
 package aspect.repositories
 
+import akka.pattern.pipe
+import aspect.common.Messages.Start
 import aspect.common.actors.{BaseActor, NodeSingleton}
+import aspect.common.mongo.MongoDatabase
 import aspect.domain.{ProjectId, Target, TargetId}
+import aspect.mongo.{BsonProtocol, TargetCollection}
 
 object TargetRepository extends NodeSingleton[TargetRepository] {
   case class GetProjectTargets(projectId: ProjectId)
@@ -21,38 +25,31 @@ object TargetRepository extends NodeSingleton[TargetRepository] {
   case class TargetUpdated(targetId: TargetId)
 }
 
-class TargetRepository extends BaseActor {
+class TargetRepository extends BaseActor with BsonProtocol {
   import TargetRepository._
+  import context.dispatcher
 
-  def receive: Receive = working(Nil)
+  val collection = new TargetCollection(MongoDatabase.db)
 
-  def working(targets: List[Target]): Receive = {
+  def receive: Receive = {
+    case Start => collection.ensureIndexes
+
     case GetProjectTargets(projectId) =>
-      val result = targets.filter(_.projectId == projectId)
-      sender ! ProjectTargets(projectId, result)
+      collection.getProjectTargets(projectId) map (ProjectTargets(projectId, _)) pipeTo sender
 
     case FindTargetById(targetId) =>
-      val result = targets.find(_.id == targetId) match {
+      collection.get(targetId) map {
         case Some(target) => TargetFoundById(target)
         case None => TargetNotFoundById(targetId)
-      }
-      sender ! result
+      } pipeTo sender
 
     case AddTarget(target) =>
-      become(working(target +: targets.filterNot(_.id == target.id)))
-      sender ! TargetAdded(target.id)
+      collection.add(target) map (_ => TargetAdded(target.id)) pipeTo sender
 
     case RemoveTarget(targetId) =>
-      become(working(targets.filterNot(_.id == targetId)))
-      sender !  TargetRemoved(targetId)
+      collection.remove(targetId) map (_ => TargetRemoved(targetId)) pipeTo sender
 
     case UpdateTarget(targetId, name, keywords) =>
-      targets.find(_.id == targetId).foreach { target =>
-        val updatedTarget = target.copy(
-          name = name.getOrElse(target.name),
-          keywords = keywords.getOrElse(target.keywords))
-        become(working(updatedTarget +: targets.filterNot(_.id == targetId)))
-      }
-      sender ! TargetUpdated(targetId)
+      collection.update(targetId, name, keywords) map (_ => TargetUpdated(targetId)) pipeTo sender
   }
 }

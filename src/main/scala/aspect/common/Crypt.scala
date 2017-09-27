@@ -4,30 +4,31 @@ import java.security.MessageDigest
 
 object Crypt {
 
-  case class Md5(underlying: Array[Byte]) {
-    def parse(value: String): Md5 = Md5(hex2bytes(value))
-    override def toString: String = s"${getClass.getSimpleName}(${underlying.HEX})"
-  }
-
-  case class Sha256(underlying: Array[Byte]) {
-    override def toString: String = s"${getClass.getSimpleName}(${underlying.HEX})"
+  case class Sha256 private(underlying: String) extends AnyVal {
+    override def toString: String = underlying
   }
 
   object Sha256 {
-    def parse(value: String): Sha256 = Sha256(hex2bytes(value))
+    def apply(hash: Array[Byte]): Sha256 = new Sha256(hash.hex)
+    def apply(hash: String): Sha256 = new Sha256(hash.toLowerCase)
+    def eval(data: Array[Byte]): Sha256 = Sha256(sha256hash(data))
+    def eval(data: String): Sha256 = Sha256(sha256hash(data.getBytes))
   }
 
-  case class Adler32(underlying: Int) {
-    override def toString: String = s"${getClass.getSimpleName}(${underlying.HEX})"
+  case class Adler32(underlying: Int) extends AnyVal {
+    override def toString: String = underlying.hex
+  }
+
+  object Adler32 {
+    def eval(data: Array[Byte]): Adler32 = Adler32(adler32sum(data))
+    def eval(data: String): Adler32 = Adler32(adler32sum(data.getBytes))
   }
 
   def hex2bytes(hex: String): Array[Byte] =
     hex.sliding(2, 2).map(Integer.parseInt(_, 16).toByte).toArray
 
-  val md5Algorithm: MessageDigest = MessageDigest.getInstance("MD5")
   val sha256Algorithm: MessageDigest = MessageDigest.getInstance("SHA-256")
 
-  def md5hash(bytes: Array[Byte]): Array[Byte] = md5Algorithm.digest(bytes)
   def sha256hash(bytes: Array[Byte]): Array[Byte] = sha256Algorithm.digest(bytes)
 
   def adler32sum(bytes: Array[Byte]): Int = {
@@ -41,23 +42,18 @@ object Crypt {
   }
 
   implicit class IntegerCryptOps(val value: Int) extends AnyVal {
-    def HEX: String = value.hex.toUpperCase
     def hex: String = Integer.toHexString(value)
   }
 
   implicit class ArrayOfBytesCryptOps(val bytes: Array[Byte]) extends AnyVal {
-    def HEX: String = bytes.map("%02X".format(_)).mkString
     def hex: String = bytes.map("%02x".format(_)).mkString
-    def md5: Md5 = Md5(md5hash(bytes))
-    def sha256: Sha256 = Sha256(sha256hash(bytes))
-    def adler32: Adler32 = Adler32(adler32sum(bytes))
+    def sha256: Sha256 = Sha256.eval(bytes)
+    def adler32: Adler32 = Adler32.eval(bytes)
   }
 
   implicit class StringCryptOps(val value: String) extends AnyVal {
-    def HEX: String = value.getBytes.HEX
     def hex: String = value.getBytes.hex
-    def md5: Md5 = value.getBytes.md5
-    def sha256: Sha256 = value.getBytes.sha256
-    def adler32: Adler32 = value.getBytes.adler32
+    def sha256: Sha256 = Sha256.eval(value)
+    def adler32: Adler32 = Adler32.eval(value)
   }
 }

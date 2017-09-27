@@ -7,6 +7,7 @@ import aspect.repositories.ProjectRepository._
 import aspect.repositories.{ProjectRepository, UserRepository}
 import aspect.repositories.UserRepository.{FindUserById, UserFoundById, UserNotFoundById}
 import aspect.rest.Controller
+import aspect.rest.RestErrors.{Forbidden, NotFound, Unauthorized}
 
 object RemoveProjectController {
   def props(userId: UserId, projectId: ProjectId) =

@@ -3,22 +3,23 @@ package aspect.rest
 import java.time.LocalDateTime
 
 import akka.http.scaladsl.model.StatusCode
-import akka.http.scaladsl.model.Uri.Path.Segment
 import akka.http.scaladsl.server.PathMatcher1
 import akka.http.scaladsl.server.PathMatchers
 import akka.http.scaladsl.unmarshalling.Unmarshaller
 import aspect.common.Crypt._
 import aspect.common.Messages.Done
 import aspect.domain.{ProjectId, SessionToken, TargetId, UserId}
+import aspect.rest.RestErrors.ErrorResult
 import aspect.rest.models._
 import spray.json._
 
-trait JsonProtocol extends DefaultJsonProtocol with RestErrors {
+trait JsonProtocol extends DefaultJsonProtocol {
 
-  val ProjectIdSegment: PathMatcher1[ProjectId] = PathMatchers.Segment.map(ProjectId)
-  val TargetIdSegment: PathMatcher1[TargetId] = PathMatchers.Segment.map(TargetId)
+  val ProjectIdSegment: PathMatcher1[ProjectId] = PathMatchers.Segment.map(ProjectId.apply)
+  val TargetIdSegment: PathMatcher1[TargetId] = PathMatchers.Segment.map(TargetId.apply)
 
-  implicit val ProjectIdUnmarshaller: Unmarshaller[String, ProjectId] = Unmarshaller.strict[String, ProjectId](ProjectId)
+  implicit val ProjectIdUnmarshaller: Unmarshaller[String, ProjectId] =
+    Unmarshaller.strict[String, ProjectId](ProjectId.apply)
 
   implicit object LocalDateTimeJsonFormat extends RootJsonFormat[LocalDateTime] {
     def write(datetime: LocalDateTime): JsValue = JsString(datetime.toString)
@@ -38,10 +39,10 @@ trait JsonProtocol extends DefaultJsonProtocol with RestErrors {
 
   implicit object Sha256JsonFormat extends JsonFormat[Sha256] {
     def read(json: JsValue): Sha256 = json match {
-      case JsString(value) => Sha256.parse(value)
+      case JsString(value) => Sha256(value)
       case _ => throw DeserializationException("Expected Sha256 as JsString")
     }
-    def write(value: Sha256): JsValue = JsString(value.underlying.hex)
+    def write(value: Sha256): JsValue = JsString(value.underlying)
   }
 
   implicit object DoneJsonFormat extends RootJsonFormat[Done] {
@@ -105,4 +106,5 @@ trait JsonProtocol extends DefaultJsonProtocol with RestErrors {
   implicit val jsonTargetResult: RootJsonFormat[TargetResult] = jsonFormat5(TargetResult.apply)
   implicit val jsonAddTargetData: RootJsonFormat[AddTargetData] = jsonFormat3(AddTargetData)
   implicit val jsonAddTargetResult: RootJsonFormat[AddTargetResult] = jsonFormat1(AddTargetResult)
-  implicit val jsonUpdateTargetData: RootJsonFormat[UpdateTargetData] = jsonFormat2(UpdateTargetData)}
+  implicit val jsonUpdateTargetData: RootJsonFormat[UpdateTargetData] = jsonFormat2(UpdateTargetData)
+}

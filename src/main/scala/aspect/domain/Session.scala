@@ -2,9 +2,11 @@ package aspect.domain
 
 import java.time.LocalDateTime
 
-import aspect.common.{EntityId, now, uuid}
+import aspect.common.{EntityId, EntityIdCompanion, utc, uuid}
 
 case class SessionToken(value: String) extends EntityId
+
+object SessionToken extends EntityIdCompanion[SessionToken]
 
 case class Session(token: SessionToken,
                    userId: UserId,
@@ -13,5 +15,5 @@ case class Session(token: SessionToken,
 
 object Session {
   def create(userId: UserId): Session =
-    Session(SessionToken(uuid.toString), userId, now, now)
+    Session(SessionToken(uuid.toString), userId, utc, utc)
 }

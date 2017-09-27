@@ -1,7 +1,11 @@
 package aspect.repositories
 
+import akka.pattern.pipe
+import aspect.common.Messages.Start
 import aspect.common.actors.{BaseActor, NodeSingleton}
+import aspect.common.mongo.MongoDatabase
 import aspect.domain.{User, UserId}
+import aspect.mongo.{BsonProtocol, UserCollection}
 
 object UserRepository extends NodeSingleton[UserRepository] {
   case class FindUserById(userId: UserId)
@@ -15,24 +19,25 @@ object UserRepository extends NodeSingleton[UserRepository] {
   case class UserNotFoundByName(username: String) extends FindUserByNameResult
 }
 
-class UserRepository extends BaseActor {
+class UserRepository extends BaseActor with BsonProtocol {
   import UserRepository._
+  import context.dispatcher
 
-  def receive: Receive = working(Nil)
+  val collection = new UserCollection(MongoDatabase.db)
 
-  def working(users: List[User]): Receive = {
+  def receive: Receive = {
+    case Start => collection.ensureIndexes
+
     case FindUserById(userId) =>
-      val result = users.find(_.id == userId) match {
+      collection.get(userId).map {
         case Some(user) => UserFoundById(user)
         case None => UserNotFoundById(userId)
-      }
-     sender ! result
+      } pipeTo sender
 
     case FindUserByName(username) =>
-      val result = users.find(_.name == username) match {
+      collection.findUserByName(username).map {
         case Some(user) => UserFoundByName(user)
         case None => UserNotFoundByName(username)
-      }
-      sender ! result
+      } pipeTo sender
   }
 }

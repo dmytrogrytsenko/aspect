@@ -4,6 +4,7 @@ import akka.http.scaladsl.server.Route
 import aspect.common.Messages.Done
 import aspect.controllers.target._
 import aspect.domain.ProjectId
+import aspect.rest.RestErrors.BadRequest
 import aspect.rest.models._
 import aspect.rest.Routes
 

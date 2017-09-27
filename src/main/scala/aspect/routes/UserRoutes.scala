@@ -3,6 +3,7 @@ package aspect.routes
 import akka.http.scaladsl.server.Route
 import aspect.common.Messages.Done
 import aspect.controllers.user.{GetProfileController, LoginController, LogoutController}
+import aspect.rest.RestErrors.BadRequest
 import aspect.rest.models.{LoginData, LoginResult, ProfileResult}
 import aspect.rest.Routes
 
@@ -14,8 +15,10 @@ trait UserRoutes extends Routes {
     (post & path("login")) {
       entity(as[LoginData]) { data =>
         validate(data.login.nonEmpty, BadRequest.Validation.requiredMemberEmpty("login").message) {
-          complete {
-            LoginController.props(data).execute[LoginResult]
+          validate(data.password.nonEmpty, BadRequest.Validation.requiredMemberEmpty("password").message) {
+            complete {
+              LoginController.props(data).execute[LoginResult]
+            }
           }
         }
       }

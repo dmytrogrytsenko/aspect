@@ -20,11 +20,11 @@ class Repeater(settings: RepeaterSettings, factory: Config => Props) extends Bas
   case object Execute
 
   def receive: PartialFunction[Any, Unit] = {
-    case Start => wait(now + settings.initialInterval)
+    case Start => wait(utc + settings.initialInterval)
   }
 
   def wait(startTime: LocalDateTime): Unit = {
-    val justNow = now
+    val justNow = utc
     if (startTime >= justNow) self !! Execute
     else scheduleOnce(justNow - startTime, Execute)
     context.setReceiveTimeout(Duration.Undefined)
@@ -35,7 +35,7 @@ class Repeater(settings: RepeaterSettings, factory: Config => Props) extends Bas
     case Execute =>
       val operation = watch(factory(settings.operation).create("operation"))
       context.setReceiveTimeout(settings.timeout)
-      become(executing(now, operation))
+      become(executing(utc, operation))
   }
 
   def executing(startTime: LocalDateTime, operation: ActorRef): Receive = {

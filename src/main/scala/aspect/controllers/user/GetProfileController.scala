@@ -6,6 +6,7 @@ import aspect.domain.UserId
 import aspect.repositories.UserRepository
 import aspect.repositories.UserRepository.{FindUserById, UserFoundById, UserNotFoundById}
 import aspect.rest.Controller
+import aspect.rest.RestErrors.Unauthorized
 import aspect.rest.models.ProfileResult
 
 object GetProfileController {

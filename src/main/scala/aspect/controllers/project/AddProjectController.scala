@@ -7,6 +7,7 @@ import aspect.repositories.ProjectRepository.{AddProject, ProjectAdded}
 import aspect.repositories.{ProjectRepository, UserRepository}
 import aspect.repositories.UserRepository.{FindUserById, UserFoundById, UserNotFoundById}
 import aspect.rest.Controller
+import aspect.rest.RestErrors.Unauthorized
 import aspect.rest.models.{AddProjectData, AddProjectResult}
 
 object AddProjectController {
@@ -18,7 +19,7 @@ class AddProjectController(userId: UserId, data: AddProjectData) extends Control
   def receive: Receive = {
     case Start =>
       UserRepository.endpoint ! FindUserById(userId)
-    case UserFoundById(receivedUser) =>
+    case _: UserFoundById =>
       ProjectRepository.endpoint ! AddProject(Project.create(userId, data.name))
     case UserNotFoundById(`userId`) =>
       failure(Unauthorized.credentialsRejected)

@@ -1,6 +1,6 @@
 package aspect.rest
 
-import akka.actor.{ActorContext, Props, ReceiveTimeout, Status}
+import akka.actor.{ActorContext, Props}
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.model.StatusCode
 import akka.http.scaladsl.server.Directives
@@ -17,7 +17,6 @@ trait Routes extends BaseActor
   with Directives
   with AuthDirectives
   with SprayJsonSupport
-  with RestErrors
   with JsonProtocol {
 
   implicit def dispatcher: ExecutionContextExecutor

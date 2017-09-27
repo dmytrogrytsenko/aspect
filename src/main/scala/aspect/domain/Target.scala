@@ -2,9 +2,11 @@ package aspect.domain
 
 import java.time.LocalDateTime
 
-import aspect.common.{EntityId, now, uuid}
+import aspect.common.{EntityId, EntityIdCompanion, utc, uuid}
 
 case class TargetId(value: String) extends EntityId
+
+object TargetId extends EntityIdCompanion[TargetId]
 
 case class Target(id: TargetId,
                   projectId: ProjectId,
@@ -14,5 +16,5 @@ case class Target(id: TargetId,
 
 object Target {
   def create(projectId: ProjectId, name: String, keywords: String): Target =
-    Target(TargetId(uuid.toString), projectId, name, keywords, now)
+    Target(TargetId(uuid.toString), projectId, name, keywords, utc)
 }

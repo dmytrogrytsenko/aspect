@@ -1,22 +1,27 @@
 name := "aspect"
  
-version := "1.0-SNAPSHOT"
+version := "0.1.1"
  
 organization := "com.delirium"
  
 scalaVersion := "2.12.2"
 
+scalacOptions := Seq("-unchecked", "-deprecation")
+
 resolvers ++= Seq(
-  "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/"
+  "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/",
+  "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
 )
 
 libraryDependencies ++= Seq(
+  "ch.qos.logback" % "logback-classic" % "1.2.3",
   "com.typesafe" % "config" % "1.3.1",
-  "com.typesafe.akka" %% "akka-actor" % "2.5.3",
-  "com.typesafe.akka" %% "akka-cluster" % "2.5.3",
-  "com.typesafe.akka" %% "akka-http" % "10.0.9",
-  "com.typesafe.akka" %% "akka-http-spray-json" % "10.0.9",
-  "com.github.mauricio" %% "postgresql-async" % "0.2.21",
-  "org.scalikejdbc" %% "scalikejdbc-async" % "0.8.0",
-  "org.scalikejdbc" %% "scalikejdbc-syntax-support-macro" % "3.0.2"
+  "com.typesafe.akka" %% "akka-actor" % "2.5.4",
+  "com.typesafe.akka" %% "akka-slf4j" % "2.5.4",
+  "com.typesafe.akka" %% "akka-cluster" % "2.5.4",
+  "com.typesafe.akka" %% "akka-http" % "10.0.10",
+  "com.typesafe.akka" %% "akka-http-spray-json" % "10.0.10",
+  "org.reactivemongo" %% "reactivemongo" % "0.12.6",
+  "org.scalatest" %% "scalatest" % "3.0.1" % Test,
+  "com.typesafe.akka" %% "akka-testkit" % "2.5.4" % Test
 )

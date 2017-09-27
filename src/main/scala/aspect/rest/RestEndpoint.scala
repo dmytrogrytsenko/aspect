@@ -23,7 +23,8 @@ class RestEndpoint(settings: RestEndpointSettings) extends BaseActor
   with WebRoutes
   with UserRoutes
   with ProjectRoutes
-  with TargetRoutes {
+  with TargetRoutes
+  with Jasonify {
 
   implicit val materializer = ActorMaterializer()
   implicit val dispatcher: ExecutionContextExecutor = context.dispatcher

@@ -3,7 +3,7 @@ package aspect.common.extensions
 import akka.actor._
 import akka.cluster.{Cluster, Member, MemberStatus}
 import akka.event.LoggingAdapter
-import akka.pattern.ask
+import akka.pattern.{PipeToSupport, ask}
 import akka.util.Timeout
 import aspect.common.Messages.Start
 

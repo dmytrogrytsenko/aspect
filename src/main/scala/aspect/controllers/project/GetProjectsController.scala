@@ -7,6 +7,7 @@ import aspect.repositories.ProjectRepository.{GetUserProjects, UserProjects}
 import aspect.repositories.{ProjectRepository, UserRepository}
 import aspect.repositories.UserRepository.{FindUserById, UserFoundById, UserNotFoundById}
 import aspect.rest.Controller
+import aspect.rest.RestErrors.Unauthorized
 import aspect.rest.models.{ProjectItemResult, ProjectListResult}
 
 object GetProjectsController {

@@ -1,8 +1,11 @@
 package aspect.repositories
 
-import aspect.common._
+import akka.pattern.pipe
+import aspect.common.Messages.Start
 import aspect.common.actors.{BaseActor, NodeSingleton}
+import aspect.common.mongo.MongoDatabase
 import aspect.domain.{Session, SessionToken}
+import aspect.mongo.{BsonProtocol, SessionCollection}
 
 object SessionRepository extends NodeSingleton[SessionRepository] {
   case class AddSession(session: Session)
@@ -19,31 +22,30 @@ object SessionRepository extends NodeSingleton[SessionRepository] {
   case class ActivityCompleted(token: SessionToken)
 }
 
-class SessionRepository extends BaseActor {
+class SessionRepository extends BaseActor with BsonProtocol {
   import SessionRepository._
+  import context.dispatcher
 
-  def receive: Receive = working(Nil)
+  val collection = new SessionCollection(MongoDatabase.db)
 
-  def working(sessions: List[Session]): Receive = {
+  def receive: Receive = {
+    case Start => collection.ensureIndexes
+
     case AddSession(session) =>
-      become(working(session +: sessions.filterNot(_.token == session.token)))
-      sender ! SessionAdded(session.token)
+      collection.add(session) map (_ => SessionAdded(session.token)) pipeTo sender
 
     case RemoveSession(token) =>
-      become(working(sessions.filterNot(_.token == token)))
-      sender ! SessionRemoved(token)
+      collection.remove(token) map (_ => SessionRemoved(token)) pipeTo sender
 
     case GetSession(token) =>
-      val result = sessions.find(_.token == token) match {
+      collection.get(token) map {
         case Some(session) => SessionFound(session)
         case None => SessionNotFound(token)
-      }
-      sender ! result
+      } pipeTo sender
 
     case Activity(token) =>
-      sessions.find(_.token == token).foreach { session =>
-        become(working(session.copy(lastActivityAt = now) +: sessions.filterNot(_.token == token)))
-      }
-      sender ! ActivityCompleted(token)
+      collection.activity(token) map { _ =>
+        ActivityCompleted(token)
+      } pipeTo sender
   }
 }
