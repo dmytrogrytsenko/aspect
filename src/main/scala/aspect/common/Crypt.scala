@@ -4,7 +4,7 @@ import java.security.MessageDigest
 
 object Crypt {
 
-  case class Sha256 private(underlying: String) extends AnyVal {
+  class Sha256 private(val underlying: String) extends AnyVal {
     override def toString: String = underlying
   }
 

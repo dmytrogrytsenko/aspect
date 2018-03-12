@@ -3,6 +3,7 @@ package aspect
 import akka.actor.ActorSystem
 import aspect.common.Messages.Start
 import aspect.common.config.{Application, Settings}
+import aspect.common.mongo.MongoDatabase
 import com.typesafe.config.Config
 
 import scala.io.StdIn._
@@ -12,6 +13,7 @@ object Main extends App {
   val settings = MainSettings(Application.config)
   system.actorOf(Guardian.props(settings.aspect), "aspect") ! Start
   while (readLine() != "exit") { }
+  MongoDatabase.driver.close()
   system.terminate()
 }
 
